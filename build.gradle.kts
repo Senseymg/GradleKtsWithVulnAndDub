@@ -1,45 +1,97 @@
 plugins {
-	java
-	id("org.springframework.boot") version "3.3.5"
-	id("io.spring.dependency-management") version "1.1.6"
+    java
+    id("org.springframework.boot") version "3.4.0" 
+    id("io.spring.dependency-management") version "1.1.6"
 }
 
 group = "groovy.test"
 version = "0.0.1-SNAPSHOT"
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
-	}
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-web:3.4.0")
-	implementation("org.springframework.boot:spring-boot-starter-web:2.7.13")
-	implementation("org.springframework.boot:spring-boot-starter-groovy-templates")
-	implementation("org.apache.logging.log4j:log4j-core:2.14.1")
-	implementation("org.apache.logging.log4j:log4j-core:2.20.0")
-	implementation("org.springframework.boot:spring-boot-starter-jdbc")
-	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("org.postgresql:postgresql")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.boot:spring-boot-testcontainers")
-	testImplementation("org.testcontainers:junit-jupiter")
-	testImplementation("org.testcontainers:postgresql")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Explicit Spring dependencies (ensure using 6.2.1)  
+    implementation("org.springframework:spring-core:6.2.1")   
+    implementation("org.springframework:spring-jcl:6.2.1")
+    implementation("org.springframework:spring-aop:6.2.1")
+    implementation("org.springframework:spring-tx:6.2.1")
+    implementation("org.springframework:spring-jdbc:6.2.1")
+    implementation("org.springframework:spring-expression:6.2.1")
+
+    // Apache Tomcat Dependencies
+    implementation("org.apache.tomcat.embed:tomcat-embed-websocket:11.0.2")  
+    implementation("org.apache.tomcat.embed:tomcat-embed-el:11.0.2") 
+    implementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.2")  
+
+
+    implementation("com.fasterxml.jackson.core:jackson-core:2.18.2")  
+
+    // Logging Dependencies
+    implementation("org.apache.logging.log4j:log4j-api:3.0.0-beta2")  
+    implementation("org.slf4j:slf4j-api:2.1.0-alpha1") 
+
+    // Other Dependencies
+    implementation("org.checkerframework:checker-qual:3.48.3")
+    implementation("org.apache.groovy:groovy-xml:5.0.0-alpha-11")
+    implementation("org.apache.groovy:groovy-templates:5.0.0-alpha-11")
+    implementation("org.apache.groovy:groovy:5.0.0-alpha-11")
+    implementation("org.apache.groovy:groovy-bom:5.0.0-alpha-11")
+    implementation("io.micrometer:micrometer-commons:1.14.2")
+
+    compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.0")
+    }
+    dependencies {
+        dependency("org.springframework:spring-core:6.2.1")
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "org.springframework") {
+                useVersion("6.2.1")
+            }
+if (requested.group == "com.fasterxml.jackson") {
+                useVersion("2.18.2")
+            }
+            if (requested.group == "org.apache.tomcat.embed") {
+                useVersion("11.0.2")
+            }
+            if (requested.group == "org.apache.logging.log4j") {
+                useVersion("3.0.0")
+            }
+            if (requested.group == "org.slf4j") {
+                useVersion("2.1.0")
+            }
+        }
+        force("org.springframework:spring-core:6.2.1")
+        force ("io.micrometer:micrometer-commons:1.14.2")
+        force ("io.micrometer:micrometer-observation:1.14.2")
+    }
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
